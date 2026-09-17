@@ -60,9 +60,10 @@ export async function createProject(input: {
   assetIds: string[];
 }): Promise<Project> {
   const lib = await getLibrary();
-  const assets = input.assetIds
-    .map((aid) => lib.assetTypes.find((a) => a.id === aid))
-    .filter((a): a is NonNullable<typeof a> => Boolean(a))
+  // Follow the prompt library's order, so the PDF pages come out in the order
+  // the team arranged them rather than the order they were ticked.
+  const assets = lib.assetTypes
+    .filter((a) => input.assetIds.includes(a.id))
     .map((a) => ({ id: a.id, name: a.name, aspectRatio: a.aspectRatio }));
   if (!assets.length) throw new Error("Choose at least one POSM type.");
 
@@ -99,6 +100,9 @@ export async function updateProject(
     const a = lib.assetTypes.find((x) => x.id === patch.addAssetId);
     if (!a) throw new Error("That POSM type isn't in the prompt library.");
     p.assets.push({ id: a.id, name: a.name, aspectRatio: a.aspectRatio });
+    // Keep the project in the prompt library's order.
+    const rank = new Map(lib.assetTypes.map((t, i) => [t.id, i]));
+    p.assets.sort((x, y) => (rank.get(x.id) ?? 999) - (rank.get(y.id) ?? 999));
   }
   if (patch.removeAssetId) {
     p.assets = p.assets.filter((a) => a.id !== patch.removeAssetId);
