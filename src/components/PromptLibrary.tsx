@@ -48,6 +48,18 @@ export function PromptLibrary() {
   const updateAsset = (id: string, patch: Partial<AssetType>) =>
     setDraft((d) => (d ? { ...d, assetTypes: d.assetTypes.map((a) => (a.id === id ? { ...a, ...patch } : a)) } : d));
 
+  /** Moves a POSM type up or down. This order is the order of pages in the tool kit PDF. */
+  const moveAsset = (id: string, direction: -1 | 1) =>
+    setDraft((d) => {
+      if (!d) return d;
+      const from = d.assetTypes.findIndex((a) => a.id === id);
+      const to = from + direction;
+      if (from < 0 || to < 0 || to >= d.assetTypes.length) return d;
+      const assetTypes = [...d.assetTypes];
+      [assetTypes[from], assetTypes[to]] = [assetTypes[to], assetTypes[from]];
+      return { ...d, assetTypes };
+    });
+
   async function save() {
     if (!draft) return;
     setSaving(true);
@@ -72,18 +84,48 @@ export function PromptLibrary() {
       <nav className="library-rail" aria-label="Prompt library sections">
         <h1 className="display-md">Prompt library</h1>
         <p className="rail-label">POSM types</p>
+        <p className="rail-hint">In tool kit page order. Use the arrows to rearrange.</p>
         <ul>
-          {draft.assetTypes.map((a) => (
-            <li key={a.id}>
+          {draft.assetTypes.map((a, i) => (
+            <li key={a.id} className="rail-row">
               <button
                 type="button"
                 className="rail-item"
                 aria-current={section.kind === "asset" && section.id === a.id ? "true" : undefined}
                 onClick={() => setSection({ kind: "asset", id: a.id })}
               >
-                <span>{a.name}</span>
+                <span>
+                  <span className="rail-pos">{i + 1}</span>
+                  {a.name}
+                </span>
                 <small>{a.aspectRatio}</small>
               </button>
+              <span className="rail-moves">
+                <button
+                  type="button"
+                  className="move-button"
+                  onClick={() => moveAsset(a.id, -1)}
+                  disabled={i === 0}
+                  aria-label={`Move ${a.name} up`}
+                  title="Move up"
+                >
+                  <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden>
+                    <path d="M8 4l4 6H4z" fill="currentColor" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  className="move-button"
+                  onClick={() => moveAsset(a.id, 1)}
+                  disabled={i === draft.assetTypes.length - 1}
+                  aria-label={`Move ${a.name} down`}
+                  title="Move down"
+                >
+                  <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden>
+                    <path d="M8 12L4 6h8z" fill="currentColor" />
+                  </svg>
+                </button>
+              </span>
             </li>
           ))}
         </ul>
