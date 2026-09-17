@@ -1008,6 +1008,48 @@ main {
   color: var(--muted);
   margin-top: 20px;
 }
+.rail-hint {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+.rail-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.rail-pos {
+  display: inline-block;
+  min-width: 18px;
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 0.85rem;
+}
+.rail-item[aria-current="true"] .rail-pos {
+  color: rgba(255, 255, 255, 0.7);
+}
+.rail-moves {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+}
+.move-button {
+  background: none;
+  border: 0;
+  padding: 1px 4px;
+  color: var(--grape);
+  cursor: pointer;
+  line-height: 0;
+  border-radius: 4px;
+}
+.move-button:hover:not(:disabled) {
+  background: var(--lilac);
+}
+.move-button:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
 .rail-item {
   width: 100%;
   display: flex;
